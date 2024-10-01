@@ -14,4 +14,5 @@
 </p>
 
 # What is  RUST SML?
- Rust SML is an implementation of the [Semantic Modeling Language](https://github.com/semanticdatalayer/SML) an open start for data modeling developed by [AtScale's Semantic Data Layer ](https://github.com/semanticdatalayer). This open standard hopes to be an open standard for  
+ Rust SML is an implementation of the [Semantic Modeling Language](https://github.com/semanticdatalayer/SML) an open standard for data modeling developed by [AtScale's Semantic Data Layer ](https://github.com/semanticdatalayer).
+ +
