@@ -1,0 +1,10 @@
+[package]
+name = "rust-sml"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0"
+validator = "0.18.1"
+serde_yml = "0.0.12"
+regex = "1.0"
