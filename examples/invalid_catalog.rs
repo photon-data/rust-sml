@@ -3,9 +3,9 @@ use rust_sml::objects::Catalog;
 
 fn main() {
     // Example of creating a valid Catalog
-    let unique_name = "my_unique_name";
-    let object_type = "catalog";
-    let label = "My Catalog";
+    let unique_name = "my_invalid_unique_name";
+    let object_type = "not using 'catalog' as the type";
+    let label = ""; //empty label
     let version = "1.0.0";
     let aggressive_agg_promotion = false;
     let build_speculative_aggs = true;
