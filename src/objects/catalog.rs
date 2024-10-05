@@ -9,7 +9,6 @@ pub struct Catalog {
     // The name of the repository. This must be unique across all repositories and subrepositories.
     pub unique_name: String,
     // The type of object defined by the file. For catalog.yml, this must be catalog
-    // #[Validate(custom = "catalog")]
     pub object_type: String,
     //The name of the repository, as it appears in the consumption tool. This value does not need to be unique.
     pub label: String ,
@@ -28,6 +27,7 @@ pub struct Catalog {
 
 
 impl ObjectTrait for Catalog{
+    type Error = CatalogError;
 
 
     fn validate(&self) -> Result<(), CatalogError> {

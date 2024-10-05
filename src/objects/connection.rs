@@ -1,114 +1,146 @@
 
-use crate::objects::validators::common_validator;
-use crate::objects::validators::catalog_validator;
+use crate::objects::validators::connection_validator;
 use crate::objects::traits::object_trait::ObjectTrait;
-use crate::objects::errors::catalog_error::CatalogError;
+use crate::objects::errors::connection_error::ConnectionError;
 
 #[derive(Debug)]
-pub struct Catalog {
-    // The name of the repository. This must be unique across all repositories and subrepositories.
+pub struct Connection {
+    // A unique name for the database and the schema. This must be unique across all repositories and subrepositories.
     pub unique_name: String,
-    // The type of object defined by the file. For catalog.yml, this must be catalog
-    // #[Validate(custom = "catalog")]
+    // The type of object defined by this file. For connections, this value must be connection.
     pub object_type: String,
-    //The name of the repository, as it appears in the consumption tool. This value does not need to be unique.
+    //The name of the database connection as it appears in the consumption tool. This value does not need to be unique.
     pub label: String ,
-    //The version of SML being used.
-    pub version: String,
-    //Enables/disables aggressive aggregate promotion for the repository.
-    // When enabled, all aggregates referenced by a query are considered for promotion,
-    // regardless of whether a join to other non-preferred or non-aggregate datasets was required.
-    pub aggressive_agg_promotion: bool,
-    // Enables/disables speculative aggregates for the repository.
-    // These are intended to improve the performance of queries from client BI tools faster than with demand-defined aggregates alone.
-    // When enabled, the query engine automatically creates aggregate tables that it anticipates being useful based on your models.
-    pub build_speculative_aggs: bool
+    //The name of the database connection itself, excluding the schema.
+    pub as_connection: String,
+    //The source database used for this connection.
+    pub database: String,
+   // The source schema used for this connection.
+   pub schema: String,
+
 }
 
+impl ObjectTrait for Connection {
+    type Error = ConnectionError;
 
-
-impl ObjectTrait for Catalog{
-
-
-    fn validate(&self) -> Result<(), CatalogError> {
-        // Validate version
-        common_validator::validate_version(&self.version).map_err(CatalogError::InvalidVersionFormat)?;
-
+    fn validate(&self) -> Result<(), ConnectionError> {
         // Validate unique name
-        catalog_validator::validate_unique_name(&self.unique_name).map_err(CatalogError::InvalidUniqueName)?;
+        connection_validator::validate_unique_name(&self.unique_name)
+            .map_err(ConnectionError::InvalidUniqueName)?;
 
         // Validate object type
-        catalog_validator::validate_object_type(&self.object_type).map_err(CatalogError::UnknownObjectType)?;
+        connection_validator::validate_object_type(&self.object_type)
+            .map_err(ConnectionError::UnknownObjectType)?;
 
         // Validate label
-        catalog_validator::validate_label(&self.label).map_err(|err| CatalogError::InvalidLabel(err))?;
+        connection_validator::validate_label(&self.label)
+            .map_err(|err| ConnectionError::InvalidLabel(err))?;
 
-        // Validate aggressive aggregate promotion
-        catalog_validator::validate_aggressive_agg_promotion(self.aggressive_agg_promotion).map_err(|err| CatalogError::InvalidAggressiveAggPromotion(err))?;
+        // Validate as_connection
+        connection_validator::validate_as_connection(&self.as_connection)
+            .map_err(|err| ConnectionError::InvalidAsConnection(err))?;
 
-        // Validate build speculative aggregates
-        catalog_validator::validate_build_speculative_aggs(self.build_speculative_aggs).map_err(|err| CatalogError::InvalidBuildSpeculativeAggs(err))?;
+        // Validate database
+        connection_validator::validate_database(&self.database)
+            .map_err(|err| ConnectionError::InvalidDatabase(err))?;
+
+        // Validate schema
+        connection_validator::validate_schema(&self.schema)
+            .map_err(|err| ConnectionError::InvalidSchema(err))?;
 
         Ok(())
     }
 
-    fn is_valid(&self) -> bool{
-    true
-    }
 }
-
-impl Catalog{
+impl Connection{
    pub fn new(
         unique_name: String,
         object_type: String,
         label: String,
-        version: String,
-        aggressive_agg_promotion: bool,
-        build_speculative_aggs: bool
-    ) -> Result<Self, CatalogError>{
-        let catalog = Catalog {
+        as_connection: String,
+        database: String,
+        schema: String
+    ) -> Result<Self, ConnectionError>{
+        let connection = Connection {
             unique_name,
             object_type,
             label,
-            version,
-            aggressive_agg_promotion,
-            build_speculative_aggs,
+            as_connection,
+            database,
+            schema
         };
-        // Validate the Catalog object
-        catalog.validate()?;
+        // Validate the Connection object
+       connection.validate()?;
 
-        Ok(catalog)
+        Ok(connection)
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::*; // This brings the outer scope into the test module
+    use super::*;
+    use crate::objects::errors::connection_error::ConnectionError;
 
     #[test]
-    fn test_valid_catalog_creation() {
-        let result = Catalog::new(
-            "my_unique_name".to_string(),
-            "catalog".to_string(),
-            "My Catalog".to_string(),
-            "1.0.0".to_string(),
-            false,
-            true,
+    fn test_valid_connection_creation() {
+        let result = Connection::new(
+            "my_unique_connection".to_string(),
+            "connection".to_string(),
+            "My Connection".to_string(),
+            "my_connection_string".to_string(),
+            "my_database".to_string(),
+            "my_schema".to_string(),
         );
         assert!(result.is_ok());
     }
 
     #[test]
-    fn test_invalid_catalog_creation() {
-        let result = Catalog::new(
+    fn test_invalid_connection_creation_empty_unique_name() {
+        let result = Connection::new(
             "".to_string(), // Invalid unique_name
-            "catalog".to_string(),
-            "My Catalog".to_string(),
-            "1.0.0".to_string(),
-            false,
-            true,
+            "connection".to_string(),
+            "My Connection".to_string(),
+            "my_connection_string".to_string(),
+            "my_database".to_string(),
+            "my_schema".to_string(),
         );
         assert!(result.is_err());
+        if let Err(ConnectionError::InvalidUniqueName(err)) = result {
+            assert_eq!(err, "A Connection's unique_name cannot be empty.");
+        }
     }
+
+    #[test]
+    fn test_invalid_connection_creation_empty_label() {
+        let result = Connection::new(
+            "my_unique_connection".to_string(),
+            "connection".to_string(),
+            "".to_string(), // Invalid label
+            "my_connection_string".to_string(),
+            "my_database".to_string(),
+            "my_schema".to_string(),
+        );
+        assert!(result.is_err());
+        if let Err(ConnectionError::InvalidLabel(err)) = result {
+            assert_eq!(err, "Label cannot be empty.");
+        }
+    }
+
+    #[test]
+    fn test_invalid_connection_creation_invalid_object_type() {
+        let result = Connection::new(
+            "my_unique_connection".to_string(),
+            "invalid_type".to_string(), // Invalid object type
+            "My Connection".to_string(),
+            "my_connection_string".to_string(),
+            "my_database".to_string(),
+            "my_schema".to_string(),
+        );
+        assert!(result.is_err());
+        if let Err(ConnectionError::UnknownObjectType(err)) = result {
+            assert_eq!(err, "Object type must be 'connection'.");
+        }
+    }
+
+    // Additional tests can go here for other validation scenarios
 }

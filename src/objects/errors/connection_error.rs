@@ -1,10 +1,11 @@
 #[derive(Debug)]
-pub enum CatalogError {
+pub enum ConnectionError {
     InvalidUniqueName(String),
     UnknownObjectType(String),
     InvalidLabel(String),
-    InvalidVersionFormat(String),
-    InvalidAggressiveAggPromotion(String),
-    InvalidBuildSpeculativeAggs(String),
+    InvalidAsConnection(String),
+    InvalidDatabase(String),
+    InvalidSchema(String),
+
 
 }
