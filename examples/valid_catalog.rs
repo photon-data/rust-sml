@@ -1,4 +1,3 @@
-// use serde_yml::{self, Value};
 use rust_sml::objects::Catalog;
 
 fn main() {
