@@ -1,9 +1,8 @@
-// use serde_yml::{self, Value};
 use rust_sml::objects::Catalog;
 
 fn main() {
     // Example of creating a valid Catalog
-    let unique_name = "my_unique_name";
+    let unique_name = "my_valid_unique_name";
     let object_type = "catalog";
     let label = "My Catalog";
     let version = "1.0.0";
